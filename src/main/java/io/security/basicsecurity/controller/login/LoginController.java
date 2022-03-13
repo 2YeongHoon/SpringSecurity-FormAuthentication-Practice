@@ -1,5 +1,6 @@
 package io.security.basicsecurity.controller.login;
 
+import io.security.basicsecurity.domain.Account;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 public class LoginController {
 
+    // 인가예외처리 인증 후 권한이 없는 경우
     @GetMapping("/login")
     public String login(@RequestParam(value = "error", required = false) String error,
                         @RequestParam(value = "exception", required = false) String exception, Model model){
@@ -30,5 +32,14 @@ public class LoginController {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
         return "redirect:/login";
+    }
+
+    @GetMapping("/denied")
+    public String accessDenied(@RequestParam(value = "exception", required = false) String exception, Model model){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account account = (Account)authentication.getPrincipal();
+        model.addAttribute("username", account.getUserName());
+        model.addAttribute("exception", exception);
+        return "user/login/denied";
     }
 }
